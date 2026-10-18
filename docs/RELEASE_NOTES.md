@@ -1,35 +1,25 @@
 ## Português (Brasil)
 
-Controle Hent v0.2.0 — interface redesenhada como um controle de ar residencial.
+Controle Hent v0.2.1 — tela inteira e modo escuro.
 
-- Corpo claro, visor verde e botão central de energia.
-- Ligar/desligar com um toque, sem diálogos.
-- Temperatura, ventilação, modo e estado solicitado no visor.
-- Indicador discreto `IR: OK` / `IR: NOT OK`.
-- Luz vermelha no topo durante a transmissão, sem mensagens de “enviando”.
-- Removidos avisos técnicos, seletor de protocolo, importação, exportação,
-  relatórios e editor/configuração de códigos pela interface.
-- Sinais carregados exclusivamente dos JSON do repositório.
-- Idioma automático em português brasileiro e inglês.
+- Controle ocupando toda a largura e altura disponíveis, sem cartão central.
+- Fundo escuro, botões maiores e visor verde com alto contraste.
+- Barras do sistema ocultas; deslize da borda para acessá-las temporariamente.
+- Espaçamento adaptável e respeito ao recorte da câmera.
+- Mantidos o indicador IR e a luz de transmissão, sem menus técnicos.
 
 Os sinais candidatos ainda precisam de validação física no Hent. Os cinco
-botões sem códigos conhecidos permanecem desabilitados; a mudança visual não
-adiciona códigos nem comprova compatibilidade.
+botões sem códigos conhecidos permanecem desabilitados.
 
 ## English
 
-Hent Remote v0.2.0 — redesigned to feel like a home AC remote.
+Hent Remote v0.2.1 — full screen and dark mode.
 
-- Pale body, green LCD and central power key.
-- One-touch on/off without dialogs.
-- Temperature, fan, mode and requested power state on the display.
-- Discreet `IR: OK` / `IR: NOT OK` indicator.
-- Red top light during transmission, with no sending messages.
-- Removed technical notices, protocol selector, import/export, reports and
-  front-end code configuration.
-- Signals load exclusively from repository JSON assets.
-- Automatic Brazilian Portuguese and English localization.
+- Remote fills the available width and height without a centered card.
+- Dark background, larger buttons and a high-contrast green display.
+- Hidden system bars; swipe from an edge to reveal them temporarily.
+- Adaptive spacing and safe camera-cutout handling.
+- Retains the IR indicator and transmission light without technical menus.
 
-The candidate signals still need physical Hent testing. Five buttons without
-known codes remain disabled; the visual change does not add codes or establish
-hardware compatibility.
+The candidate signals still require physical Hent testing. Five buttons without
+known codes remain disabled.

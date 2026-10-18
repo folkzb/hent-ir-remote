@@ -3,10 +3,10 @@
 Português (Brasil) · [English](README.md)
 
 Controle infravermelho Android de código aberto com aparência de controle de
-ar residencial: corpo claro, visor verde, ajuste de temperatura, botão central
+ar residencial: tela inteira em modo escuro, visor verde, ajuste de temperatura, botão central
 de energia e uma luz de transmissão no topo.
 
-[Baixar APK v0.2.0](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.0/hent-ir-remote-v0.2.0-debug-signed.apk) · [Versões](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
+[Baixar APK v0.2.1](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.1/hent-ir-remote-v0.2.1-debug-signed.apk) · [Versões](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
 
 ## Como usar
 
@@ -83,3 +83,7 @@ privadas no repositório. A tag deve corresponder a `versionName`; incremente
 **GPL-3.0-ou-posterior.** [Créditos de terceiros](THIRD_PARTY_NOTICES.md).
 Sem vínculo oficial com Hent, Xiaomi ou Transcold.
 [Fontes da pesquisa](README.md#license-and-research-sources).
+
+O controle ocupa a tela inteira em modo escuro. Deslize a partir de uma borda
+para mostrar temporariamente as barras do Android. Os recortes físicos da câmera
+são respeitados; janelas pequenas podem rolar para manter os botões acessíveis.

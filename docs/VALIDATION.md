@@ -8,11 +8,12 @@ Date / Data: 2026-10-18
 - PT-BR/English resource parity: **33 entries**, matching format arguments.
 - Bundled editable JSON codes: present inside the APK; all 156 state-table entries match the reference encoder.
 - CI APKs use a runner debug signing key. Installing over a differently signed build may require uninstalling the previous app first; saved settings are reset.
+- v0.2.1 UI: full-width/full-height dark remote, immersive system bars, safe physical-cutout insets and scroll fallback in compact windows.
 - Original remote layout: **13 command identifiers** from Hent's published diagram.
 - Debug APK signature: verified, v1 and v2 schemes.
 - APK metadata: Android 6+ (minSdk 23), targetSdk 35; both English and PT-BR labels.
 - Only requested Android permission: `android.permission.TRANSMIT_IR`.
-- v0.2.0 local debug/release builds and Android lint: **passed**.
+- v0.2.1 local debug/release builds and Android lint: **passed**.
 - v0.2.0 adds four control-state tests for power toggle, bounded temperature, fan/mode changes and swing behavior.
 - GitHub CI and publication status: see the repository Actions and Releases pages.
 - **No physical phone/AC test performed. No original Hent codes verified.**

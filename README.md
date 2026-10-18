@@ -3,10 +3,10 @@
 [Português (Brasil)](README.pt-BR.md) · English
 
 An open-source Android infrared remote with the familiar feel of a home AC
-controller: a pale body, green LCD, temperature rocker, one-touch power button
+controller: a full-screen dark layout, green LCD, temperature rocker, one-touch power button
 and a small transmission light at the top.
 
-[Download v0.2.0 APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.0/hent-ir-remote-v0.2.0-debug-signed.apk) · [Releases](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
+[Download v0.2.1 APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.1/hent-ir-remote-v0.2.1-debug-signed.apk) · [Releases](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
 
 ## Using the remote
 
@@ -89,3 +89,7 @@ No affiliation with Hent, Xiaomi or Transcold.
 - [User-identified Alibaba product](https://www.alibaba.com/product-detail/Wholesale-12V-24V-AC-Battery-Electric_1601601019022.html)
 - [IRremoteESP8266 Transcold source](https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Transcold.cpp)
 - [Original protocol investigation](https://github.com/crankyoldgit/IRremoteESP8266/issues/1256)
+
+The remote fills the screen in an immersive dark theme. Swipe from an edge to
+show the Android system bars temporarily. Physical camera cutouts remain clear;
+compact windows can scroll to keep every button reachable.
