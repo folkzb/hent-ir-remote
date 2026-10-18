@@ -3,7 +3,7 @@
 Date / Data: 2026-10-18
 
 - Local Android debug and unsigned release builds: **passed**.
-- Unit tests: **34 passed**, zero failures or errors.
+- Unit tests: **37 passed**, zero failures or errors.
 - Android lint: **zero issues**.
 - PT-BR/English resource parity: **33 entries**, matching format arguments.
 - Bundled editable JSON codes: present inside the APK; all 156 state-table entries match the reference encoder.
@@ -13,7 +13,10 @@ Date / Data: 2026-10-18
 - Debug APK signature: verified, v1 and v2 schemes.
 - APK metadata: Android 6+ (minSdk 23), targetSdk 35; both English and PT-BR labels.
 - Only requested Android permission: `android.permission.TRANSMIT_IR`.
-- v0.2.1 local debug/release builds and Android lint: **passed**.
+- v0.2.2 local debug/release builds and Android lint: **passed**.
+- Startup regression: v0.2.1 reproduced `NullPointerException` in `PhoneWindow.getInsetsController()` on Android 14 and 15, before the window decor existed. The fullscreen request now runs after `setContentView`.
+- Robolectric 4.14.1 Activity startup, focus and background/resume tests: **passed on API 28, 34 and 35 (Android 9, 14 and 15)**. These run in CI alongside the signal tests.
+- No emulator or physical-device launch was performed by the maintainer; Activity tests use Robolectric.
 - v0.2.0 adds four control-state tests for power toggle, bounded temperature, fan/mode changes and swing behavior.
 - GitHub CI and publication status: see the repository Actions and Releases pages.
 - **No physical phone/AC test performed. No original Hent codes verified.**

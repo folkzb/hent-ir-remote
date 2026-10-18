@@ -6,8 +6,8 @@ android {
         applicationId 'io.github.folkzb.hentremote'
         minSdk 23
         targetSdk 35
-        versionCode 4
-        versionName '0.2.1'
+        versionCode 5
+        versionName '0.2.2'
         resourceConfigurations += ['en', 'pt-rBR']
     }
     signingConfigs {
@@ -29,6 +29,13 @@ android {
     bundle { language { enableSplit = false } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     lint { abortOnError true; checkReleaseBuilds true }
+    testOptions {
+        unitTests.includeAndroidResources = true
+        unitTests.all {
+            systemProperty 'robolectric.dependency.repo.url', 'https://repo.maven.apache.org/maven2'
+        }
+    }
 }
 dependencies { testImplementation 'junit:junit:4.13.2' }
 dependencies { testImplementation 'org.json:json:20240303' }
+dependencies { testImplementation 'org.robolectric:robolectric:4.14.1' }

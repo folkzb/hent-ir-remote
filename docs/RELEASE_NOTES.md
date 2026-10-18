@@ -1,25 +1,23 @@
 ## Português (Brasil)
 
-Controle Hent v0.2.1 — tela inteira e modo escuro.
+Controle Hent v0.2.2 — correção de fechamento ao abrir.
 
-- Controle ocupando toda a largura e altura disponíveis, sem cartão central.
-- Fundo escuro, botões maiores e visor verde com alto contraste.
-- Barras do sistema ocultas; deslize da borda para acessá-las temporariamente.
-- Espaçamento adaptável e respeito ao recorte da câmera.
-- Mantidos o indicador IR e a luz de transmissão, sem menus técnicos.
+- Corrigido acesso à janela antes de sua criação durante a ativação da tela inteira. A falha foi reproduzida no Android 14 e 15.
+- A tela inteira é ativada depois de criar o conteúdo; modo escuro e controles foram mantidos.
+- Adicionado teste de abertura, foco e retorno do segundo plano no Android 9, 14 e 15, com Robolectric.
+- Validação local: 37 testes aprovados, lint e APKs debug/release compilados.
 
 Os sinais candidatos ainda precisam de validação física no Hent. Os cinco
 botões sem códigos conhecidos permanecem desabilitados.
 
 ## English
 
-Hent Remote v0.2.1 — full screen and dark mode.
+Hent Remote v0.2.2 — fix for crash on launch.
 
-- Remote fills the available width and height without a centered card.
-- Dark background, larger buttons and a high-contrast green display.
-- Hidden system bars; swipe from an edge to reveal them temporarily.
-- Adaptive spacing and safe camera-cutout handling.
-- Retains the IR indicator and transmission light without technical menus.
+- Fixed access to the window before its decor was created when enabling full screen. The crash was reproduced on Android 14 and 15.
+- Full screen is enabled after creating the content; dark mode and controls are retained.
+- Added Activity launch, focus and background/resume regression tests on Android 9, 14 and 15 using Robolectric.
+- Local validation: 37 tests passed, lint passed and debug/release APKs built.
 
 The candidate signals still require physical Hent testing. Five buttons without
 known codes remain disabled.

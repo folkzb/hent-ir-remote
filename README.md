@@ -6,7 +6,7 @@ An open-source Android infrared remote with the familiar feel of a home AC
 controller: a full-screen dark layout, green LCD, temperature rocker, one-touch power button
 and a small transmission light at the top.
 
-[Download v0.2.1 APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.1/hent-ir-remote-v0.2.1-debug-signed.apk) · [Releases](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
+[Download v0.2.2 APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.2/hent-ir-remote-v0.2.2-debug-signed.apk) · [Releases](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
 
 ## Using the remote
 
@@ -66,7 +66,8 @@ python3 tools/check_resources.py
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`. Local release builds
 are unsigned unless maintainer signing variables are configured.
 
-The Build workflow checks both languages, unit tests, lint and debug/release
+The Build workflow checks both languages, unit tests (including Activity startup
+and resume on Android 9, 14 and 15), lint and debug/release
 builds. Successful pushes to `main` publish the current version as a prerelease
 with an installable debug-signed APK and SHA-256 checksum if that version has
 not already been published. Existing releases are preserved.

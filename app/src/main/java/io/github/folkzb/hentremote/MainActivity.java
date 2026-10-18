@@ -52,7 +52,6 @@ public final class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
-        enterFullscreen();
         preferences = getSharedPreferences("remote", MODE_PRIVATE);
         int storedMode = preferences.getInt("mode", Transcold.COOL);
         if (storedMode != Transcold.COOL && storedMode != Transcold.AUTO && storedMode != Transcold.FAN) storedMode = Transcold.COOL;
@@ -130,6 +129,8 @@ public final class MainActivity extends Activity {
             }
             view.setPadding(left, top, right, bottom); return insets;
         });
+        // setContentView creates the decor required by Window.getInsetsController().
+        // Request immersive mode only after that window exists (Android 11+).
         scroll.requestApplyInsets(); enterFullscreen();
         FrameLayout emitter = new FrameLayout(this);
         View window = new View(this); window.setBackground(surface(0xFF394C56, 4, 0));

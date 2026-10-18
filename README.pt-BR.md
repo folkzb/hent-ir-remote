@@ -6,7 +6,7 @@ Controle infravermelho Android de código aberto com aparência de controle de
 ar residencial: tela inteira em modo escuro, visor verde, ajuste de temperatura, botão central
 de energia e uma luz de transmissão no topo.
 
-[Baixar APK v0.2.1](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.1/hent-ir-remote-v0.2.1-debug-signed.apk) · [Versões](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
+[Baixar APK v0.2.2](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.2/hent-ir-remote-v0.2.2-debug-signed.apk) · [Versões](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
 
 ## Como usar
 
@@ -66,7 +66,8 @@ python3 tools/check_resources.py
 O APK de teste fica em `app/build/outputs/apk/debug/app-debug.apk`.
 O build release local é não assinado sem configurar a assinatura.
 
-O workflow Build verifica traduções, testes, lint e builds. Um push aprovado
+O workflow Build verifica traduções, testes (incluindo abertura e retomada da tela
+no Android 9, 14 e 15), lint e builds. Um push aprovado
 em `main` publica a versão atual como pré-lançamento com APK instalável de teste
 e SHA-256, caso a versão ainda não exista. Versões publicadas são preservadas.
 

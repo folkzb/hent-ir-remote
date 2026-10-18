@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Version tag / Tag da versão (ex.: v0.2.1)'
+        description: 'Version tag / Tag da versão (ex.: v0.2.2)'
         required: true
-        default: v0.2.1
+        default: v0.2.2
 permissions:
   contents: write
 concurrency:
