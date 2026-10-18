@@ -2,300 +2,248 @@
 package io.github.folkzb.hentremote;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
+import android.content.res.ColorStateList;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.hardware.ConsumerIrManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.*;
-import java.io.*;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.json.JSONObject;
 
 public final class MainActivity extends Activity {
-    private static final int IMPORT = 10, EXPORT = 11, REPORT = 12;
-    private static final int INK = Color.rgb(16,28,37), PANEL = Color.rgb(27,43,55);
-    private static final int MINT = Color.rgb(115,228,210), WHITE = Color.rgb(238,246,248);
-    private static final int MUTED = Color.rgb(169,189,200);
+    private static final int BACKGROUND = 0xFFE7EBEE, PLASTIC = 0xFFF8FAFB;
+    private static final int INK = 0xFF33434A, MUTED = 0xFF89979C, LCD = 0xFFDCE5CD, LCD_INK = 0xFF344A38;
     private SharedPreferences preferences;
     private ConsumerIrManager ir;
     private Profile profile = new Profile();
     private CandidateProtocol protocol;
+    private ControlState state;
     private final ExecutorService sender = Executors.newSingleThreadExecutor();
-    private final List<Button> commandButtons = new ArrayList<>();
-    private LinearLayout page;
-    private TextView state, status, mapping;
-    private int temperature = 24, speed = 0, mode = Transcold.COOL;
-    private boolean experimental, busy;
-    private String lastCommand = "", lastError = "";
-    private int lastFrequency;
-    private long lastSentAt;
+    private final Map<Command, Button> buttons = new EnumMap<>(Command.class);
+    private TextView temperature, mode, powerLabel, fanLabel, irStatus;
+    private final View[] fanBars = new View[3];
+    private LinearLayout lcd;
+    private TransmissionLight light;
+    private boolean busy, emitterAvailable;
+    private int transmissionSequence;
 
-    @Override protected void attachBaseContext(Context base) {
-        String language = base.getSharedPreferences("remote", MODE_PRIVATE).getString("language", "system");
-        if (!"system".equals(language)) {
-            Configuration config = new Configuration(base.getResources().getConfiguration());
-            config.setLocale(Locale.forLanguageTag(language));
-            base = base.createConfigurationContext(config);
-        }
-        super.attachBaseContext(base);
-    }
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         preferences = getSharedPreferences("remote", MODE_PRIVATE);
-        temperature = preferences.getInt("temperature", 24);
-        speed = preferences.getInt("speed", 0);
-        mode = preferences.getInt("mode", Transcold.COOL);
-        experimental = preferences.getBoolean("experimental", true);
+        int storedMode = preferences.getInt("mode", Transcold.COOL);
+        if (storedMode != Transcold.COOL && storedMode != Transcold.AUTO && storedMode != Transcold.FAN) storedMode = Transcold.COOL;
+        state = new ControlState(Math.max(18, Math.min(30, preferences.getInt("temperature", 24))),
+            Math.max(0, Math.min(3, preferences.getInt("speed", 0))), storedMode, preferences.getBoolean("power", false));
+        // Only bundled repository assets configure signals. Legacy user imports are ignored.
         try { protocol = CandidateProtocol.parse(readAsset("ir/transcold-candidate.json")); }
-        catch (Exception e) { experimental = false; lastError = e.getClass().getSimpleName(); }
-        String raw = preferences.getString("profile", "");
-        try { profile = Profile.parse(raw.isEmpty() ? readAsset("ir/original-overrides.json") : raw); }
-        catch (Exception ignored) { /* Keep empty profile if invalid. */ }
-        ir = (ConsumerIrManager)getSystemService(CONSUMER_IR_SERVICE);
-        buildUi();
-        if (protocol == null) status.setText(R.string.file_error);
-        if (saved != null) {
-            lastCommand = saved.getString("lastCommand", "");
-            lastSentAt = saved.getLong("lastSentAt", 0);
-            if (lastSentAt > 0) status.setText(getString(R.string.sent, lastCommand));
-        }
+        catch (Exception ignored) { protocol = null; }
+        try { profile = Profile.parse(readAsset("ir/original-overrides.json")); }
+        catch (Exception ignored) { profile = new Profile(); }
+        ir = (ConsumerIrManager) getSystemService(CONSUMER_IR_SERVICE);
+        try { emitterAvailable = ir != null && ir.hasIrEmitter(); }
+        catch (RuntimeException ignored) { emitterAvailable = false; }
+        buildRemote();
+        refresh();
     }
     private String readAsset(String path) throws IOException {
-        try (InputStream stream=getAssets().open(path)) {
-            ByteArrayOutputStream out=new ByteArrayOutputStream(); byte[] buffer=new byte[8192]; int count;
-            while((count=stream.read(buffer))!=-1) {
-                if(out.size()+count>1048576)throw new IOException("Catalog too large");
-                out.write(buffer,0,count);
+        try (InputStream stream = getAssets().open(path)) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream(); byte[] buffer = new byte[8192]; int count;
+            while ((count = stream.read(buffer)) != -1) {
+                if (out.size() + count > 1048576) throw new IOException("Catalog too large");
+                out.write(buffer, 0, count);
             }
-            return new String(out.toByteArray(),StandardCharsets.UTF_8);
+            return new String(out.toByteArray(), StandardCharsets.UTF_8);
         }
     }
-    private boolean hasEmitter() { try { return ir != null && ir.hasIrEmitter(); } catch (RuntimeException e) { return false; } }
-    private static boolean supports(ConsumerIrManager.CarrierFrequencyRange[] ranges, int frequency) {
-        for (ConsumerIrManager.CarrierFrequencyRange r : ranges)
-            if (frequency >= r.getMinFrequency() && frequency <= r.getMaxFrequency()) return true;
-        return false;
-    }
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
-    private GradientDrawable rounded(int color) {
-        GradientDrawable d = new GradientDrawable(); d.setColor(color); d.setCornerRadius(dp(18)); return d;
+    private GradientDrawable surface(int fill, int radius, int border) {
+        GradientDrawable drawable = new GradientDrawable(); drawable.setColor(fill); drawable.setCornerRadius(dp(radius));
+        if (border != 0) drawable.setStroke(dp(1), border);
+        return drawable;
     }
-    private TextView text(String value, int size, int color) {
-        TextView t = new TextView(this); t.setText(value); t.setTextSize(size); t.setTextColor(color);
-        t.setPadding(dp(4), dp(8), dp(4), dp(8)); return t;
+    private TextView label(String text, int size, int color) {
+        TextView view = new TextView(this); view.setText(text); view.setTextSize(size); view.setTextColor(color);
+        view.setGravity(Gravity.CENTER); view.setIncludeFontPadding(false); return view;
     }
-    private void addText(int resource, int size, int color) { page.addView(text(getString(resource), size, color)); }
-    private Button button(String label, Runnable action) {
-        Button b = new Button(this); b.setText(label); b.setTextSize(13); b.setAllCaps(false);
-        b.setTextColor(WHITE); b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(PANEL));
-        b.setMinHeight(dp(64)); b.setPadding(dp(5), dp(6), dp(5), dp(6)); b.setOnClickListener(v -> action.run()); return b;
-    }
-    private void buildUi() {
-        commandButtons.clear();
-        ScrollView scroll = new ScrollView(this); scroll.setFillViewport(true); scroll.setBackgroundColor(INK);
-        page = new LinearLayout(this); page.setOrientation(LinearLayout.VERTICAL); page.setPadding(dp(20), dp(14), dp(20), dp(24));
-        scroll.addView(page); setContentView(scroll);
-        scroll.setOnApplyWindowInsetsListener((v, insets) -> {
-            // Includes status/navigation bars on Android 15 edge-to-edge.
-            v.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+    private void space(LinearLayout parent, int height) { parent.addView(new View(this), new LinearLayout.LayoutParams(1, dp(height))); }
+    private LinearLayout horizontal() { LinearLayout row = new LinearLayout(this); row.setGravity(Gravity.CENTER_VERTICAL); return row; }
+    private void buildRemote() {
+        ScrollView scroll = new ScrollView(this); scroll.setFillViewport(true); scroll.setBackgroundColor(BACKGROUND);
+        scroll.setClipToPadding(false);
+        LinearLayout outer = new LinearLayout(this); outer.setOrientation(LinearLayout.VERTICAL); outer.setGravity(Gravity.CENTER);
+        outer.setPadding(dp(16), dp(20), dp(16), dp(20)); scroll.addView(outer); setContentView(scroll);
+        scroll.setOnApplyWindowInsetsListener((view, insets) -> {
+            view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
                 insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom()); return insets;
         });
         scroll.requestApplyInsets();
-        TextView eyebrow = text(getString(R.string.eyebrow), 12, MINT); eyebrow.setLetterSpacing(.12f); page.addView(eyebrow);
-        TextView title = text(getString(R.string.app_name), 30, WHITE); title.setTypeface(null, Typeface.BOLD); page.addView(title);
-        addText(R.string.subtitle, 14, MUTED);
-        TextView hardware = text(getString(hasEmitter() ? R.string.ir_available : R.string.no_ir), 13, hasEmitter() ? MINT : Color.rgb(255,191,120));
-        page.addView(hardware);
-        TextView note = text(getString(R.string.experimental_warning), 14, Color.rgb(255,207,139));
-        note.setBackground(rounded(PANEL)); note.setPadding(dp(14), dp(14), dp(14), dp(14)); page.addView(note);
-        Switch candidate = new Switch(this); candidate.setText(R.string.experimental_profile); candidate.setTextColor(WHITE);
-        candidate.setPadding(0,dp(16),0,dp(12)); candidate.setChecked(experimental); page.addView(candidate);
-        candidate.setEnabled(protocol != null);
-        candidate.setOnCheckedChangeListener((v, checked) -> {
-            if (checked) {
-                new AlertDialog.Builder(this).setTitle(R.string.experimental_profile).setMessage(R.string.candidate_explanation)
-                    .setPositiveButton(R.string.enable, (d,w) -> { experimental = true; persist(); refresh(); })
-                    .setNegativeButton(android.R.string.cancel, (d,w) -> candidate.setChecked(false))
-                    .setOnCancelListener(d -> candidate.setChecked(false)).show();
-            } else { experimental = false; persist(); refresh(); }
-        });
-        mapping = text("", 13, MUTED); page.addView(mapping);
-        state = text("", 25, MINT); state.setGravity(Gravity.CENTER); state.setBackground(rounded(PANEL)); page.addView(state);
-        addText(R.string.local_state, 12, MUTED);
-        row(Command.LIGHT, Command.POWER);
-        row(Command.TEMP_UP);
-        row(Command.FAN_DOWN, Command.AUTO, Command.FAN_UP);
-        row(Command.TEMP_DOWN);
-        row(Command.STRONG, Command.ECO, Command.SLEEP);
-        row(Command.SWING, Command.FRESH_AIR, Command.DISPLAY);
-        status = text(getString(R.string.ready), 14, MUTED); status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE); page.addView(status);
-        addText(R.string.settings, 20, WHITE);
-        page.addView(button(getString(R.string.save_settings), () -> { persist(); toast(R.string.saved); }));
-        page.addView(button(getString(R.string.import_profile), () -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT); intent.setType("*/*"); intent.addCategory(Intent.CATEGORY_OPENABLE); startActivityForResult(intent, IMPORT);
-        }));
-        page.addView(button(getString(R.string.export_profile), () -> exportDocument(EXPORT, "hent-ir-profile.json")));
-        page.addView(button(getString(R.string.test_result), this::recordResult));
-        page.addView(button(getString(R.string.export_report), () -> exportDocument(REPORT, "hent-ir-report.json")));
-        page.addView(button(getString(R.string.language), this::chooseLanguage));
-        page.addView(button(getString(R.string.help), this::showHelp));
-        refresh();
-    }
-    private void row(Command... commands) {
-        LinearLayout row = new LinearLayout(this); row.setGravity(Gravity.CENTER);
-        for (Command command : commands) {
-            Button b = button(getString(command.label), () -> press(command)); b.setTag(command);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, -2, 1); params.setMargins(dp(3),dp(3),dp(3),dp(3));
-            row.addView(b,params); commandButtons.add(b);
+        LinearLayout body = new LinearLayout(this); body.setOrientation(LinearLayout.VERTICAL); body.setGravity(Gravity.CENTER_HORIZONTAL);
+        body.setPadding(dp(22), dp(12), dp(22), dp(24)); body.setBackground(surface(PLASTIC, 38, 0xFFDAE0E3));
+        body.setElevation(dp(8));
+        int width = Math.max(240, Math.min(360, getResources().getConfiguration().screenWidthDp - 32));
+        outer.addView(body, new LinearLayout.LayoutParams(dp(width), -2));
+        FrameLayout emitter = new FrameLayout(this);
+        View window = new View(this); window.setBackground(surface(0xFF425052, 4, 0));
+        FrameLayout.LayoutParams windowParams = new FrameLayout.LayoutParams(dp(40), dp(6), Gravity.CENTER);
+        emitter.addView(window, windowParams); light = new TransmissionLight();
+        FrameLayout.LayoutParams lightParams = new FrameLayout.LayoutParams(dp(24), dp(24), Gravity.END | Gravity.CENTER_VERTICAL);
+        lightParams.setMarginEnd(dp(8)); emitter.addView(light, lightParams);
+        body.addView(emitter, new LinearLayout.LayoutParams(-1, dp(24)));
+        space(body, 10);
+        LinearLayout header = horizontal();
+        TextView brand = label(getString(R.string.brand), 15, INK); brand.setLetterSpacing(.20f); brand.setTypeface(null, Typeface.BOLD); brand.setGravity(Gravity.START);
+        header.addView(brand, new LinearLayout.LayoutParams(0, -2, 1));
+        irStatus = label("", 10, MUTED); irStatus.setTypeface(Typeface.MONOSPACE); header.addView(irStatus);
+        body.addView(header, new LinearLayout.LayoutParams(-1, -2)); space(body, 18);
+        lcd = new LinearLayout(this); lcd.setOrientation(LinearLayout.VERTICAL); lcd.setPadding(dp(18), dp(14), dp(18), dp(14));
+        lcd.setBackground(surface(LCD, 14, 0xFFC5D1BA));
+        LinearLayout lcdHeader = horizontal();
+        mode = label("", 11, LCD_INK); mode.setTypeface(null, Typeface.BOLD); mode.setGravity(Gravity.START);
+        lcdHeader.addView(mode, new LinearLayout.LayoutParams(0, -2, 1));
+        powerLabel = label("", 10, LCD_INK); powerLabel.setTypeface(Typeface.MONOSPACE); lcdHeader.addView(powerLabel);
+        lcd.addView(lcdHeader);
+        LinearLayout reading = horizontal(); reading.setGravity(Gravity.CENTER);
+        temperature = label("", 78, LCD_INK); temperature.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+        reading.addView(temperature);
+        TextView unit = label(getString(R.string.celsius), 23, LCD_INK);
+        LinearLayout.LayoutParams unitParams = new LinearLayout.LayoutParams(-2, -2); unitParams.setMarginStart(dp(6)); reading.addView(unit, unitParams);
+        lcd.addView(reading, new LinearLayout.LayoutParams(-1, dp(102)));
+        LinearLayout fanRow = horizontal();
+        fanLabel = label("", 10, LCD_INK); fanLabel.setGravity(Gravity.START); fanRow.addView(fanLabel,new LinearLayout.LayoutParams(0, -2, 1));
+        LinearLayout bars = horizontal(); bars.setGravity(Gravity.BOTTOM);
+        for (int i = 0; i < fanBars.length; i++) {
+            View bar = new View(this); bar.setBackground(surface(LCD_INK, 2, 0)); fanBars[i] = bar;
+            LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(dp(6), dp(7 + i * 4)); barParams.setMarginStart(dp(4)); bars.addView(bar, barParams);
         }
-        page.addView(row);
+        fanRow.addView(bars); lcd.addView(fanRow); body.addView(lcd, new LinearLayout.LayoutParams(-1, -2)); space(body, 24);
+        LinearLayout topKeys = horizontal(); topKeys.setGravity(Gravity.CENTER);
+        addButton(topKeys, Command.LIGHT, getString(R.string.light), 58, 15, false);
+        View gap = new View(this); topKeys.addView(gap, new LinearLayout.LayoutParams(0, 1, 1));
+        addButton(topKeys, Command.POWER, getString(R.string.power_symbol), 62, 30, true);
+        topKeys.addView(new View(this), new LinearLayout.LayoutParams(0, 1, 1));
+        addButton(topKeys, Command.DISPLAY, getString(R.string.display), 58, 13, false);
+        body.addView(topKeys, new LinearLayout.LayoutParams(-1, -2)); space(body, 22);
+        TextView tempCaption = label(getString(R.string.temperature_caption), 10, MUTED); tempCaption.setLetterSpacing(.10f); body.addView(tempCaption); space(body, 6);
+        LinearLayout temperatureKeys = horizontal();
+        addButton(temperatureKeys, Command.TEMP_DOWN, getString(R.string.minus), 72, 32, false);
+        TextView tempUnit = label(getString(R.string.celsius), 17, MUTED); temperatureKeys.addView(tempUnit, new LinearLayout.LayoutParams(0, -2, 1));
+        addButton(temperatureKeys, Command.TEMP_UP, getString(R.string.plus), 72, 32, false);
+        body.addView(temperatureKeys, new LinearLayout.LayoutParams(-1, -2)); space(body, 16);
+        row(body, Command.FAN_DOWN, Command.AUTO, Command.FAN_UP); space(body, 12);
+        row(body, Command.STRONG, Command.ECO, Command.SLEEP); space(body, 12);
+        row(body, Command.SWING, Command.FRESH_AIR); space(body, 22);
+        TextView footer = label(getString(R.string.remote_caption), 9, MUTED); footer.setLetterSpacing(.13f); body.addView(footer);
+    }
+    private void addButton(LinearLayout row, Command command, String title, int width, int textSize, boolean power) {
+        Button button = new Button(this); button.setText(title); button.setTextSize(textSize); button.setAllCaps(false);
+        button.setTextColor(power ? Color.WHITE : INK); button.setContentDescription(getString(command.label));
+        button.setGravity(Gravity.CENTER); button.setPadding(dp(4), 0, dp(4), 0); button.setMinWidth(0); button.setMinimumWidth(0);
+        button.setMinHeight(dp(54)); button.setStateListAnimator(null); button.setBackgroundTintList((ColorStateList)null);
+        StateListDrawable background = new StateListDrawable();
+        background.addState(new int[]{android.R.attr.state_pressed}, surface(power ? 0xFFBC504A : 0xFFDDE4E6, power ? 32 : 17, 0xFFD3DCE0));
+        background.addState(new int[]{}, surface(power ? 0xFFD66D60 : 0xFFEEF2F4, power ? 32 : 17, power ? 0xFFC86157 : 0xFFDCE3E6));
+        button.setBackground(background); button.setElevation(dp(2));
+        button.setOnClickListener(view -> press(command)); buttons.put(command, button);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(width == 0 ? 0 : dp(width), dp(power ? 62 : 54), width == 0 ? 1 : 0);
+        params.setMargins(dp(3), dp(3), dp(3), dp(3)); row.addView(button, params);
+    }
+    private void row(LinearLayout body, Command... commands) {
+        LinearLayout row = horizontal();
+        for (Command command : commands) addButton(row, command, getString(command.label), 0, 12, false);
+        body.addView(row, new LinearLayout.LayoutParams(-1, -2));
     }
     private void refresh() {
-        String[] fans = getResources().getStringArray(R.array.fans);
-        state.setText(getString(R.string.state, temperature, fans[speed]));
-        int available = 0;
-        for (Command command : Command.values())
-            if(profile.commands.containsKey(command) || (experimental && protocol != null && command.hasCandidate())) available++;
-        mapping.setText(getString(R.string.mapping_count, profile.name, available, Command.values().length, profile.commands.size()));
-        for (Button b : commandButtons) {
-            Command c = (Command)b.getTag();
-            boolean imported = profile.commands.containsKey(c), known = experimental && protocol != null && c.hasCandidate();
-            b.setText(getString(R.string.button_status,getString(c.label),getString(imported ? R.string.imported : known ? R.string.candidate : R.string.unmapped)));
-            b.setAlpha(imported || known ? 1f : .60f); b.setEnabled(!busy);
+        temperature.setText(state.power ? Integer.toString(state.temperature) : getString(R.string.off_temperature));
+        powerLabel.setText(state.power ? R.string.on : R.string.off);
+        mode.setText(state.mode == Transcold.AUTO ? R.string.mode_auto : state.mode == Transcold.FAN ? R.string.mode_fan : R.string.mode_cool);
+        String[] speeds = getResources().getStringArray(R.array.fans);
+        fanLabel.setText(getString(R.string.fan_setting, speeds[state.speed]));
+        lcd.setAlpha(state.power ? 1f : .66f);
+        for (int i = 0; i < fanBars.length; i++) fanBars[i].setAlpha(state.power && (state.speed == 0 || i < state.speed) ? 1f : .17f);
+        setIrStatus(emitterAvailable);
+        for (Map.Entry<Command, Button> entry : buttons.entrySet()) {
+            boolean available = profile.commands.containsKey(entry.getKey()) || (protocol != null && entry.getKey().hasCandidate());
+            entry.getValue().setEnabled(emitterAvailable && available && !busy);
+            entry.getValue().setAlpha(available ? 1f : .35f);
         }
+        buttons.get(Command.POWER).setSelected(state.power);
     }
-    private void press(Command c) {
-        if (busy) return;
-        IrSignal raw = profile.commands.get(c);
-        if (raw != null) { transmit(c, raw, temperature, speed, mode); return; }
-        if (!experimental || protocol == null || !c.hasCandidate()) {
-            new AlertDialog.Builder(this).setTitle(c.label).setMessage(R.string.no_code).setPositiveButton(android.R.string.ok,null).show(); return;
-        }
-        if (c == Command.POWER) {
-            new AlertDialog.Builder(this).setTitle(R.string.power_choice).setMessage(R.string.local_state)
-                .setPositiveButton(R.string.on, (d,w) -> transmit(c, protocol.signal(protocol.state(temperature,mode,speed)),temperature,speed,mode))
-                .setNegativeButton(R.string.off, (d,w) -> transmit(c,protocol.signal(protocol.powerOff),temperature,speed,mode)).show(); return;
-        }
-        int temp = temperature, fan = speed, nextMode = mode;
-        switch (c) {
-            case TEMP_UP: temp = Math.min(30,temp+1); break;
-            case TEMP_DOWN: temp = Math.max(18,temp-1); break;
-            case FAN_UP: fan = Math.min(3,fan+1); break;
-            case FAN_DOWN: fan = Math.max(0,fan-1); break;
-            case AUTO: nextMode = Transcold.AUTO; break;
-            case FRESH_AIR: nextMode = Transcold.FAN; break;
-            default: break;
-        }
-        // Temperature adjustments select cooling after fan/automatic mode.
-        if (c == Command.TEMP_UP || c == Command.TEMP_DOWN) nextMode = Transcold.COOL;
-        int code = c == Command.SWING ? protocol.swing : protocol.state(temp,nextMode,fan);
-        transmit(c,protocol.signal(code),temp,fan,nextMode);
+    private void setIrStatus(boolean ok) {
+        irStatus.setText(ok ? R.string.ir_ok : R.string.ir_not_ok);
+        irStatus.setTextColor(ok ? 0xFF55795E : 0xFFB16159);
     }
-    private void transmit(Command command, IrSignal signal, int temp, int fan, int nextMode) {
-        if (busy) return;
-        if (!hasEmitter()) { toast(R.string.no_ir); return; }
-        final ConsumerIrManager.CarrierFrequencyRange[] ranges;
-        try { ranges = ir.getCarrierFrequencies(); }
-        catch (RuntimeException e) { showError(e); return; }
-        if (ranges != null && !supports(ranges,signal.frequencyHz)) { toast(R.string.unsupported_frequency); return; }
-        busy = true; refresh(); status.setText(R.string.sending);
-        sender.execute(() -> {
-            try {
-                ir.transmit(signal.frequencyHz,signal.patternUs());
-                runOnUiThread(() -> {
-                    if (isDestroyed()) return;
-                    temperature = temp; speed = fan; mode = nextMode;
-                    lastCommand = command.id; lastFrequency = signal.frequencyHz; lastSentAt = System.currentTimeMillis(); lastError = "";
-                    persist(); busy = false; refresh(); status.setText(getString(R.string.sent,getString(command.label)));
-                });
-            } catch (RuntimeException e) {
-                runOnUiThread(() -> { if (!isDestroyed()) { busy = false; refresh(); showError(e); } });
+    private void press(Command command) {
+        if (busy || !emitterAvailable) return;
+        ControlState next = state.next(command);
+        IrSignal signal = profile.commands.get(command);
+        if (signal == null) {
+            if (protocol == null || !command.hasCandidate()) return;
+            int code = command == Command.POWER && !next.power ? protocol.powerOff :
+                command == Command.SWING ? protocol.swing : protocol.state(next.temperature, next.mode, next.speed);
+            signal = protocol.signal(code);
+        }
+        try {
+            ConsumerIrManager.CarrierFrequencyRange[] ranges = ir.getCarrierFrequencies();
+            if (ranges != null) {
+                boolean supported = false;
+                for (ConsumerIrManager.CarrierFrequencyRange range : ranges)
+                    if (signal.frequencyHz >= range.getMinFrequency() && signal.frequencyHz <= range.getMaxFrequency()) supported = true;
+                if (!supported) { setIrStatus(false); return; }
             }
+        } catch (RuntimeException exception) { setIrStatus(false); return; }
+        final IrSignal sending = signal;
+        final int sequence = ++transmissionSequence;
+        final long started = SystemClock.uptimeMillis();
+        busy = true; refresh(); light.setLit(true);
+        sender.execute(() -> {
+            boolean success;
+            try { ir.transmit(sending.frequencyHz, sending.patternUs()); success = true; }
+            catch (RuntimeException exception) { success = false; }
+            final boolean sent = success;
+            runOnUiThread(() -> {
+                if (isDestroyed()) return;
+                if (sent) {
+                    state = next;
+                    preferences.edit().putInt("temperature", state.temperature).putInt("speed", state.speed)
+                        .putInt("mode", state.mode).putBoolean("power", state.power).apply();
+                }
+                busy = false; refresh(); if (!sent) setIrStatus(false);
+                light.postDelayed(() -> { if (sequence == transmissionSequence && !isDestroyed()) light.setLit(false); },
+                    Math.max(0, 180 - (SystemClock.uptimeMillis() - started)));
+            });
         });
     }
-    private void showError(Exception e) { lastError = e.getClass().getSimpleName(); status.setText(getString(R.string.send_error,lastError)); }
-    private void toast(int resource) { Toast.makeText(this,resource,Toast.LENGTH_SHORT).show(); }
-    private void persist() {
-        preferences.edit().putInt("temperature",temperature).putInt("speed",speed).putInt("mode",mode)
-            .putBoolean("experimental",experimental).apply();
-    }
-    private void exportDocument(int request, String name) {
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT); intent.setType("application/json");
-        intent.addCategory(Intent.CATEGORY_OPENABLE); intent.putExtra(Intent.EXTRA_TITLE,name); startActivityForResult(intent,request);
-    }
-    @Override protected void onActivityResult(int request,int result,Intent data) {
-        super.onActivityResult(request,result,data);
-        if (result != RESULT_OK || data == null || data.getData() == null) return;
-        try {
-            if (request == IMPORT) {
-                String input;
-                try (InputStream stream = getContentResolver().openInputStream(data.getData())) {
-                    if (stream == null) throw new IOException("Unable to open document");
-                    ByteArrayOutputStream output = new ByteArrayOutputStream(); byte[] buffer = new byte[8192]; int n;
-                    while ((n = stream.read(buffer)) != -1) {
-                        if (output.size()+n > 1048576) throw new IOException("Profile exceeds 1 MiB");
-                        output.write(buffer,0,n);
-                    }
-                    input = new String(output.toByteArray(),StandardCharsets.UTF_8);
-                }
-                final Profile candidate = Profile.parse(input);
-                new AlertDialog.Builder(this).setTitle(R.string.import_profile)
-                    .setMessage(getString(R.string.confirm_import,candidate.name,candidate.commands.size()))
-                    .setPositiveButton(R.string.replace,(d,w) -> {
-                        try { preferences.edit().putString("profile",candidate.json()).putString("test_result","untested").apply(); profile = candidate; refresh(); toast(R.string.imported_ok); }
-                        catch (Exception e) { status.setText(R.string.file_error); }
-                    }).setNegativeButton(android.R.string.cancel,null).show();
-            } else if (request == EXPORT || request == REPORT) {
-                String content = request == EXPORT ? profile.json() : report();
-                try (OutputStream stream = getContentResolver().openOutputStream(data.getData(),"wt")) {
-                    if (stream == null) throw new IOException("Unable to write document");
-                    stream.write(content.getBytes(StandardCharsets.UTF_8));
-                }
-                toast(R.string.exported);
-            }
-        } catch (Exception e) {
-            new AlertDialog.Builder(this).setTitle(R.string.file_error).setMessage(getString(R.string.profile_format_help))
-                .setPositiveButton(android.R.string.ok,null).show();
+    @Override protected void onDestroy() { sender.shutdown(); super.onDestroy(); }
+
+    private final class TransmissionLight extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private boolean lit;
+        TransmissionLight() { super(MainActivity.this); setLit(false); setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES); }
+        void setLit(boolean value) { lit = value; setContentDescription(getString(value ? R.string.transmitter_active : R.string.transmitter_idle)); invalidate(); }
+        @Override protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas); float cx = getWidth() / 2f, cy = getHeight() / 2f;
+            if (lit) { paint.setColor(0x35FF5149); canvas.drawCircle(cx, cy, dp(9), paint); }
+            paint.setColor(lit ? 0xFFFF5149 : 0xFFB6BABB); canvas.drawCircle(cx, cy, dp(4), paint);
+            paint.setColor(lit ? 0xFFFFC7B9 : 0xFFD1D4D4); canvas.drawCircle(cx - dp(1), cy - dp(1), dp(1), paint);
         }
     }
-    private String report() throws Exception {
-        JSONObject report = new JSONObject(); report.put("appVersion","0.1.1"); report.put("protocolCandidate",experimental ? "TRANSCOLD" : "none");
-        report.put("profile",new JSONObject(profile.json())); report.put("hasIrEmitter",hasEmitter());
-        report.put("lastCommand",lastCommand); report.put("lastFrequencyHz",lastFrequency); report.put("lastSentAt",lastSentAt);
-        report.put("lastError",lastError); report.put("userTestResult",preferences.getString("test_result","untested"));
-        return report.toString(2);
-    }
-    private void recordResult() {
-        String[] labels = getResources().getStringArray(R.array.results);
-        String[] values = {"working","partial","not_working","untested"};
-        new AlertDialog.Builder(this).setTitle(R.string.test_result).setItems(labels,(d,which) -> {
-            preferences.edit().putString("test_result",values[which]).apply(); toast(R.string.saved);
-        }).show();
-    }
-    private void chooseLanguage() {
-        String[] labels = {getString(R.string.system_language),"Português (Brasil)","English"};
-        String[] values = {"system","pt-BR","en"};
-        new AlertDialog.Builder(this).setTitle(R.string.language).setItems(labels,(d,which) -> {
-            preferences.edit().putString("language",values[which]).apply(); recreate();
-        }).show();
-    }
-    private void showHelp() {
-        new AlertDialog.Builder(this).setTitle(R.string.help).setMessage(R.string.help_text)
-            .setPositiveButton(android.R.string.ok,null).show();
-    }
-    @Override protected void onSaveInstanceState(Bundle out) {
-        super.onSaveInstanceState(out); out.putString("lastCommand",lastCommand); out.putLong("lastSentAt",lastSentAt);
-    }
-    @Override protected void onDestroy() { sender.shutdown(); super.onDestroy(); }
 }

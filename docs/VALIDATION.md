@@ -3,18 +3,18 @@
 Date / Data: 2026-10-18
 
 - Local Android debug and unsigned release builds: **passed**.
-- Unit tests: **30 passed**, zero failures or errors.
+- Unit tests: **34 passed**, zero failures or errors.
 - Android lint: **zero issues**.
-- PT-BR/English resource parity: **57 entries**, matching format arguments.
+- PT-BR/English resource parity: **33 entries**, matching format arguments.
 - Bundled editable JSON codes: present inside the APK; all 156 state-table entries match the reference encoder.
-- Local APK update: the locally built debug certificate matches the locally built v0.1.0. GitHub Actions generates a separate debug key; installing the CI APK over the local build may require uninstalling the previous app first (export profiles before uninstalling).
+- CI APKs use a runner debug signing key. Installing over a differently signed build may require uninstalling the previous app first; saved settings are reset.
 - Original remote layout: **13 command identifiers** from Hent's published diagram.
 - Debug APK signature: verified, v1 and v2 schemes.
 - APK metadata: Android 6+ (minSdk 23), targetSdk 35; both English and PT-BR labels.
 - Only requested Android permission: `android.permission.TRANSMIT_IR`.
-- GitHub Actions: **passed** unit tests, translation checks, Android lint, debug/release builds and APK publication.
-- Verified CI run: https://github.com/folkzb/hent-ir-remote/actions/runs/39133667447
-- Published experimental release: https://github.com/folkzb/hent-ir-remote/releases/tag/v0.1.1
+- v0.2.0 local debug/release builds and Android lint: **passed**.
+- v0.2.0 adds four control-state tests for power toggle, bounded temperature, fan/mode changes and swing behavior.
+- GitHub CI and publication status: see the repository Actions and Releases pages.
 - **No physical phone/AC test performed. No original Hent codes verified.**
 
 Local command:

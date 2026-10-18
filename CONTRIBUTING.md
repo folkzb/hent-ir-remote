@@ -1,21 +1,20 @@
 # Contributing / Como contribuir
 
-Issues and pull requests in English or Portuguese are welcome.
+Issues and pull requests in English or Portuguese are welcome. Report the unit
+model, remote model, buttons tested, carrier and captured pulse timings. Do not
+include private data or claim compatibility from a supplier name alone.
 
-Report device label/model, remote model, which of the 13 buttons was tested,
-carrier frequency and raw pulse timings if available. Exporting the app's
-compatibility report does not publish it: review it and attach it manually.
-Do not include private information or claim compatibility based on a supplier
-name. Do not substitute a guessed “turbo”, “eco” or “sleep” state for an
-original command.
+Edit bundled JSON assets, never add user-facing code configuration. Preserve the
+simple remote UI and English/PT-BR localization. New protocols need attribution
+and recorded reference signals. Run:
 
-Please add source attribution and recorded test vectors for new protocols.
-Run `python3 tools/check_resources.py` and
-`./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease`.
-Changes must preserve PT-BR/English parity and GPL-3.0-or-later compatibility.
+```sh
+python3 tools/check_resources.py
+./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
+```
 
-São bem-vindos relatos dos testes e códigos capturados do controle original.
-Envie modelo, botão testado, frequência e pulsos brutos quando disponíveis.
-Revise o relatório antes de anexá-lo por conta própria; o app nunca o envia.
-Não invente códigos nem declare compatibilidade pela semelhança visual.
-Mantenha as traduções em português e inglês e execute as verificações acima.
+Relatos em português e inglês são bem-vindos. Informe modelos, botões testados,
+frequência e pulsos capturados. Altere os JSON integrados, sem adicionar edição
+de códigos na interface. Preserve o visual simples e as traduções. Novos
+protocolos precisam de créditos, sinais de referência e testes. Não invente
+comandos para sugerir compatibilidade completa. Licença GPL-3.0-ou-posterior.

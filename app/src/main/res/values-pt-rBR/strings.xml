@@ -1,69 +1,40 @@
 <resources>
-<string name="app_name">Hent Controle IR</string>
-<string name="subtitle">Um controle para suas viagens.</string>
-<string name="ir_available">Emissor infravermelho detectado</string>
-<string name="no_ir">Nenhum emissor infravermelho detectado neste aparelho.</string>
-<string name="experimental_warning">Experimental • A compatibilidade com Hent ainda não foi verificada. Os 13 botões originais estão na tela; botões sem código não transmitem.</string>
-<string name="experimental_profile">Testar candidato Transcold (não verificado)</string>
-<string name="candidate_explanation">Estes códigos foram documentados para outro modelo: Transcold M1-F-NO-6. O nome parecido do fornecedor não comprova compatibilidade. Teste um comando por vez. Ativar esta opção não envia sinais. Luz, Strong, Eco, Sleep e Display ainda precisam dos códigos originais.</string>
-<string name="enable">Ativar teste</string>
-<string name="mapping_count">%1$s • Prontos para teste: %2$d / %3$d • Importados: %4$d</string>
-<string name="state">%1$d °C  ·  %2$s</string>
-<string name="local_state">Ajustes locais do candidato Transcold. O celular não lê o estado real do ar. Comandos brutos importados não atualizam estes ajustes.</string>
-<string name="light">Luz / LED</string>
-<string name="power">Ligar / desligar</string>
-<string name="temp_up">Temperatura +</string>
-<string name="temp_down">Temperatura −</string>
-<string name="fan_up">Ventilação +</string>
-<string name="fan_down">Ventilação −</string>
-<string name="auto">Automático</string>
-<string name="strong">Strong / Forte</string>
-<string name="eco">Eco / Padrão</string>
-<string name="sleep">Dormir</string>
-<string name="swing">Oscilação</string>
-<string name="fresh_air">Fresh air / Ventilar</string>
-<string name="display">Visor</string>
-<string name="ready">Aponte o topo do celular para o receptor do ar.</string>
-<string name="settings">Seu controle</string>
-<string name="save_settings">Salvar ajustes locais</string>
-<string name="saved">Salvo neste celular.</string>
-<string name="import_profile">Importar códigos dos botões (JSON)</string>
-<string name="export_profile">Exportar códigos dos botões (JSON)</string>
-<string name="imported">Código importado</string>
-<string name="candidate">Candidato não verificado</string>
-<string name="unmapped">Sem código</string>
-<string name="no_code">Este botão ainda não tem código. Nada foi enviado. Importe um perfil JSON com o sinal infravermelho bruto original. O celular não consegue aprender códigos recebendo infravermelho.</string>
-<string name="power_choice">Enviar comando de energia</string>
-<string name="on">Ligar</string>
-<string name="off">Desligar</string>
-<string name="unsupported_frequency">Esta frequência não é suportada pelo celular.</string>
-<string name="sending">Enviando…</string>
-<string name="sent">Enviado: %1$s. Confira a resposta do ar.</string>
-<string name="send_error">Não foi possível enviar (%1$s).</string>
-<string name="confirm_import">Substituir o perfil atual por “%1$s” (mapeados: %2$d)? Isso não transmite comandos.</string>
-<string name="replace">Substituir perfil</string>
-<string name="imported_ok">Perfil importado.</string>
-<string name="exported">Arquivo exportado.</string>
-<string name="file_error">Não foi possível ler ou gravar este arquivo</string>
-<string name="profile_format_help">Use um perfil JSON UTF-8 com schemaVersion 1, name e commands. Cada comando precisa de frequencyHz e patternUs (microssegundos inteiros positivos, duração menor que 2 segundos). Arquivo máximo: 1 MiB. Consulte a documentação do repositório.</string>
-<string name="export_report">Exportar relatório de compatibilidade</string>
-<string name="language">Idioma / Language</string>
-<string name="system_language">Usar idioma do celular</string>
-<string name="help">Ajuda e licença de código aberto</string>
-<string name="help_text">Este app envia infravermelho usando ConsumerIrManager do Android. Ele não recebe nem copia IR.\n\nOs 13 botões seguem a foto do produto Hent. A compatibilidade com o ar de teto Hent não foi verificada. Transcold é um candidato ativado inicialmente de outro modelo de ar, sem correspondência confirmada. Códigos ausentes nunca são inventados.\n\nImporte códigos brutos para qualquer botão. Sem internet, conta, anúncios ou rastreamento. Perfis e resultados ficam neste celular, a menos que você os exporte e compartilhe.\n\nGPL-3.0-or-later. Codificador Transcold adaptado de IRremoteESP8266 (Chandrashekar Shetty, crankyoldgit, siriuslzx); veja os créditos no código. Sem vínculo com Hent, Xiaomi ou Transcold.</string>
-<string name="test_result">Registrar resultado do teste</string>
+<string name="app_name">Controle Hent</string>
+<string name="brand">HENT</string>
+<string name="light">LUZ</string>
+<string name="power">Ligar ou desligar</string>
+<string name="power_symbol">⏻</string>
+<string name="display">VISOR</string>
+<string name="temp_up">Aumentar temperatura</string>
+<string name="temp_down">Diminuir temperatura</string>
+<string name="fan_up">VENT +</string>
+<string name="fan_down">VENT −</string>
+<string name="auto">AUTO</string>
+<string name="strong">TURBO</string>
+<string name="eco">ECO</string>
+<string name="sleep">DORMIR</string>
+<string name="swing">OSCILAR</string>
+<string name="fresh_air">VENTILAR</string>
+<string name="ir_ok">IR: OK</string>
+<string name="ir_not_ok">IR: NOT OK</string>
+<string name="on">ON</string>
+<string name="off">OFF</string>
+<string name="celsius">°C</string>
+<string name="plus">+</string>
+<string name="minus">−</string>
+<string name="off_temperature">—</string>
+<string name="mode_cool">RESFRIAR</string>
+<string name="mode_auto">AUTO</string>
+<string name="mode_fan">VENTILAR</string>
+<string name="fan_setting">VENT  %1$s</string>
+<string name="temperature_caption">TEMPERATURA</string>
+<string name="remote_caption">AR CONDICIONADO</string>
+<string name="transmitter_active">Transmissor infravermelho ativo</string>
+<string name="transmitter_idle">Transmissor infravermelho em repouso</string>
 <string-array name="fans">
-<item>Ventilação auto</item>
-<item>Ventilação baixa</item>
-<item>Ventilação média</item>
-<item>Ventilação alta</item>
+<item>AUTO</item>
+<item>1</item>
+<item>2</item>
+<item>3</item>
 </string-array>
-<string-array name="results">
-<item>Funcionou</item>
-<item>Funcionou parcialmente</item>
-<item>Não funcionou</item>
-<item>Ainda não testado</item>
-</string-array>
-<string name="button_status">%1$s\n%2$s</string>
-<string name="eyebrow">HENT / CÓDIGO ABERTO</string>
 </resources>

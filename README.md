@@ -1,128 +1,91 @@
-# Hent IR Remote / Hent Controle IR
-
-[Download APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.1.1/hent-ir-remote-v0.1.1-debug-signed.apk) · [Release notes](https://github.com/folkzb/hent-ir-remote/releases/tag/v0.1.1) · [Passing build](https://github.com/folkzb/hent-ir-remote/actions/runs/39133667447)
+# Hent Remote
 
 [Português (Brasil)](README.pt-BR.md) · English
 
-Open-source Android infrared remote for investigating Hent 12V/24V dual-fan
-rooftop air conditioners. **Experimental: device compatibility is not verified.**
+An open-source Android infrared remote with the familiar feel of a home AC
+controller: a pale body, green LCD, temperature rocker, one-touch power button
+and a small transmission light at the top.
 
-## What works and what remains
+[Download v0.2.0 APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.0/hent-ir-remote-v0.2.0-debug-signed.apk) · [Releases](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
 
-The app includes all **13 physical buttons** from the official Hent remote
-photograph. This is **not yet a complete working clone**: original infrared
-codes have not been captured. An optional Transcold **M1-F-NO-6** candidate
-is available for eight button functions; its compatibility with Hent is unknown.
-A supplier named Shenzhen Transcold is not proof that the same protocol is used.
-No missing functions are simulated or advertised as working.
+## Using the remote
 
-| Original button | Built-in candidate | Original raw code import |
-| --- | --- | --- |
-| Lamp / LED | None | Yes |
-| Power | Separate on/off commands | Yes |
-| Temperature + / − | 18–30 °C | Yes, each button |
-| Speed + / − | Auto / low / medium / high | Yes, each button |
-| Auto | Automatic mode | Yes |
-| Strong | None | Yes |
-| Eco (standard cooling in Hent's diagram) | None | Yes |
-| Sleep | None | Yes |
-| Swing flap | Toggle | Yes |
-| Fresh air | Fan-only mode | Yes |
-| Display | None | Yes |
+Install the APK on Android 6+ with a Consumer IR emitter. The app follows your
+phone's language (English or Brazilian Portuguese). Android 13+ also provides
+per-app language selection in system settings.
 
-A JSON profile can map **all 13 commands** once the real signals are known.
-Unmapped buttons explain what is missing and do not transmit. Imported signals
-always take priority over experimental candidates. With the candidate disabled,
-only explicitly imported codes can transmit.
+- `IR: OK` means the IR emitter was detected; `IR: NOT OK` also appears when
+  transmission fails or the requested carrier is unsupported.
+- Tap Power to alternate on/off. Temperature, fan, automatic mode, fan-only and
+  swing work directly from the main screen.
+- The red light turns on during a transmission. There are no “sending” messages,
+  protocol selectors, technical notices, imports, exports or code-editing screens.
+- Settings are saved automatically after successful sends. The LCD shows the
+  state requested by this remote; IR does not read the physical unit's state.
+- All 13 original button positions are retained. Buttons with no bundled code
+  are dimmed and disabled; they never pretend to send a command.
 
-## Install and use
+No account, network permission, ads or analytics. Codes load automatically from
+repository assets. User-imported profiles from older app versions are ignored;
+only bundled repository files can change signals.
 
-1. Download an APK from this repository's **Releases** tab, or get the
-   `hent-ir-remote-debug-apk` artifact from a successful **Actions → Build** run.
-2. Install on Android 6+ with a Consumer IR emitter (for example a compatible
-   Redmi Note 13 Pro). Hardware is checked at runtime; not all Android phones
-   have an emitter. Emulators cannot test physical infrared.
-3. Choose **Português (Brasil)** or **English** in Language. One APK includes both.
-4. Import an original profile if available. The unrelated Transcold candidate is already enabled for testing; read
-   the compatibility notice. No profile import is needed for these candidates.
-5. Point the top of the phone at the AC receiver and send one command.
-   “Sent” means Android accepted transmission, not that the AC responded.
-6. Save local settings and record the observed test result. Export a report
-   if you want to share feedback yourself.
+## Maintainer: change codes in the repository
 
-The Transcold controls represent **locally requested state**, not measured AC
-state. Power offers explicit on/off choices; temperature +/− selects cooling
-mode in this candidate. Fresh air selects fan-only. Raw imported buttons do
-not change the local Transcold state because their semantics are unknown.
-Carrier frequency support is checked, transmissions run off the UI thread,
-and concurrent button sends are blocked. There is no automatic code sweep.
+- `app/src/main/assets/ir/transcold-candidate.json`: carrier, pulse timings,
+  power-off/swing commands and the complete temperature/fan/mode state table.
+- `app/src/main/assets/ir/original-overrides.json`: raw signals for any of the
+  13 original buttons; overrides take priority over the state-table encoder.
 
-## Add all original codes
+See [editing built-in codes](docs/EDITING_CODES.md) and the
+[raw code format](docs/PROFILES.md). Change JSON, bump `versionCode` and
+`versionName`, then publish an updated APK. End users never need to edit files
+or configure the protocol.
 
-See [profile format](docs/PROFILES.md) and the empty
-[original template](profiles/hent-original-template.json).
-The phone's standard Consumer IR API is **transmit-only**. Capturing a real
-remote requires an external receiver or a trustworthy existing dump. A camera
-showing an IR LED flashing is not a full protocol capture.
+## Compatibility research
 
-## Build
+The current code table comes from the documented Transcold **M1-F-NO-6**
+protocol. It has **not** been verified with the Hent 12V/24V dual-fan rooftop
+unit. A supplier name or similar case is not proof of protocol compatibility.
+Eight button functions have candidate signals. Lamp, Strong, Eco, Sleep and
+Display still need original codes and remain disabled until supplied in the
+repository. A UI redesign does not establish hardware compatibility.
 
-Requirements: JDK 17, Android SDK platform 35 and build-tools 35.0.0.
-The Gradle 8.9 wrapper and Android Gradle Plugin 8.7.3 are pinned.
+The phone's IR API only transmits. Capturing a different remote requires an
+external receiver or a trustworthy existing dump.
+
+## Build and release
+
+JDK 17, Android SDK 35, build-tools 35.0.0, Gradle 8.9, AGP 8.7.3.
+Configure `ANDROID_HOME` or the ignored `local.properties` with `sdk.dir`.
 
 ```sh
 python3 tools/check_resources.py
 ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
 
-Set `ANDROID_HOME` or the ignored `local.properties` (`sdk.dir=...`).
-Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
-Without signing environment variables, local release builds produce an
-**unsigned** release APK; install the signed debug APK for testing instead.
+Debug APK: `app/build/outputs/apk/debug/app-debug.apk`. Local release builds
+are unsigned unless maintainer signing variables are configured.
 
-## CI and releases
+The Build workflow checks both languages, unit tests, lint and debug/release
+builds. Successful pushes to `main` publish the current version as a prerelease
+with an installable debug-signed APK and SHA-256 checksum if that version has
+not already been published. Existing releases are preserved.
 
-- Pushes to `main`, pull requests and manual Build runs test the encoder and
-  profile parser, check both languages, run Android lint, build debug/release,
-  and upload the installable debug APK plus reports.
-- A successful push build on `main` automatically publishes the current version
-  as a debug-signed experimental prerelease if that version is not published yet.
-- Push a tag matching `versionName`, such as `v0.1.1`, or manually run
-  **Release** with that tag. It repeats checks before publishing a GitHub
-  **prerelease**, with bilingual notes and SHA-256 checksums.
-- Optional repository secrets: `RELEASE_KEYSTORE_BASE64`,
-  `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`.
-  When configured, releases contain a maintainer-signed release APK.
-- Without those secrets, the workflow deliberately publishes an installable
-  **debug-signed experimental APK**, named accordingly. Each runner may use a
-  different debug signing key: uninstalling the old APK can be necessary,
-  deleting local app data. Export your profile first.
-- Never commit signing keys. A release tag must match `versionName`; increase
-  `versionCode` for subsequent Android updates. Existing releases are not overwritten.
+The separate Release workflow supports version tags/manual runs and optional
+secrets `RELEASE_KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`,
+`RELEASE_KEY_PASSWORD` for a maintainer-signed APK. Without them it publishes a
+clearly named debug-signed APK. Different CI runners may use different debug
+keys; uninstalling the previous build may be required, clearing saved settings.
+Never commit signing keys. Version tags must match `versionName`; increment
+`versionCode` for updates.
 
-## Privacy and license
+## License and research sources
 
-No internet permission, ads, accounts, analytics or automatic uploads. Imported
-profiles, local settings and test results stay on the phone. Exported documents
-are saved only where you choose through Android's file picker.
+**GPL-3.0-or-later.** [Third-party notices](THIRD_PARTY_NOTICES.md).
+No affiliation with Hent, Xiaomi or Transcold.
 
-**GPL-3.0-or-later.** Contributions and forks are welcome. The Transcold encoder
-is adapted from IRremoteESP8266; see [third-party notices](THIRD_PARTY_NOTICES.md).
-No affiliation with or endorsement by Hent, Xiaomi or Transcold.
-
-## Research references
-
-- [Official Hent 12V rooftop product, SKU 5284-5](https://hentautomotivos.com.br/ar-condicionado/ar-condicionado-12v-inverter-teto-p)
-- [Official remote photograph and labels](https://cdn.dlojavirtual.com/static1/102249/sku/ar-condicionado-ar-condicionado-12v-inverter-teto-p-1753721299939.jpg)
+- [Hent rooftop AC, SKU 5284-5](https://hentautomotivos.com.br/ar-condicionado/ar-condicionado-12v-inverter-teto-p)
+- [Official remote diagram](https://cdn.dlojavirtual.com/static1/102249/sku/ar-condicionado-ar-condicionado-12v-inverter-teto-p-1753721299939.jpg)
 - [User-identified Alibaba product](https://www.alibaba.com/product-detail/Wholesale-12V-24V-AC-Battery-Electric_1601601019022.html)
-- [Transcold protocol source](https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Transcold.cpp)
-- [Original protocol investigation, M1-F-NO-6](https://github.com/crankyoldgit/IRremoteESP8266/issues/1256)
-
-No original Hent remote codes were located or verified during initial research.
-
-## Edit built-in codes
-
-The candidate is enabled on first launch in v0.1.1. All state codes, carrier and
-timings are loaded from `app/src/main/assets/ir/transcold-candidate.json`.
-Per-button raw fixes belong in `app/src/main/assets/ir/original-overrides.json`.
-Users do not need to import anything. See [editing codes](docs/EDITING_CODES.md).
+- [IRremoteESP8266 Transcold source](https://github.com/crankyoldgit/IRremoteESP8266/blob/master/src/ir_Transcold.cpp)
+- [Original protocol investigation](https://github.com/crankyoldgit/IRremoteESP8266/issues/1256)

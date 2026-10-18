@@ -1,117 +1,85 @@
-# Hent Controle IR
-
-[Baixar APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.1.1/hent-ir-remote-v0.1.1-debug-signed.apk) · [Notas da versão](https://github.com/folkzb/hent-ir-remote/releases/tag/v0.1.1) · [Build aprovado](https://github.com/folkzb/hent-ir-remote/actions/runs/39133667447)
+# Controle Hent
 
 Português (Brasil) · [English](README.md)
 
-Controle infravermelho Android de código aberto para investigar o ar de teto
-Hent 12V/24V com dois ventiladores. **Experimental: compatibilidade ainda não confirmada.**
+Controle infravermelho Android de código aberto com aparência de controle de
+ar residencial: corpo claro, visor verde, ajuste de temperatura, botão central
+de energia e uma luz de transmissão no topo.
 
-## Situação real
+[Baixar APK v0.2.0](https://github.com/folkzb/hent-ir-remote/releases/download/v0.2.0/hent-ir-remote-v0.2.0-debug-signed.apk) · [Versões](https://github.com/folkzb/hent-ir-remote/releases) · [Builds](https://github.com/folkzb/hent-ir-remote/actions)
 
-Os **13 botões físicos** da foto oficial do controle estão no app. Isso **ainda
-não é uma cópia totalmente funcional**: os códigos originais não foram obtidos.
-O protocolo opcional **Transcold M1-F-NO-6** permite testar oito funções, mas
-não foi identificado como protocolo desse Hent. O nome do fornecedor não
-comprova compatibilidade.
+## Como usar
 
-| Botão original | Candidato integrado | Importa código original |
-| --- | --- | --- |
-| Lamp / Luz LED | Sem candidato | Sim |
-| Ligar / desligar | Comandos separados de ligar e desligar | Sim |
-| Temperatura + / − | Faixa de 18–30 °C | Sim, cada botão |
-| Speed / Ventilação + / − | Auto / baixa / média / alta | Sim, cada botão |
-| Auto | Automático | Sim |
-| Strong / Forte | Sem candidato | Sim |
-| Eco / Padrão, conforme diagrama Hent | Sem candidato | Sim |
-| Sleep / Dormir | Sem candidato | Sim |
-| Swing flap / Oscilação | Alternar oscilação | Sim |
-| Fresh air / Ventilar sem resfriar | Somente ventilação | Sim |
-| Display / Visor | Sem candidato | Sim |
+Instale em Android 6 ou superior com emissor IR. O app usa o idioma do celular,
+com português brasileiro e inglês. No Android 13+, o idioma também pode ser
+selecionado nas configurações de idioma por aplicativo do sistema.
 
-Os candidatos também precisam ser testados. Botões sem código não transmitem,
-e não são substituídos por funções inventadas. Códigos importados têm prioridade.
-Com o candidato desativado, apenas os sinais importados podem ser enviados.
+- `IR: OK` indica emissor detectado. `IR: NOT OK` também aparece se o envio
+  falhar ou a portadora não for suportada.
+- Um toque no botão de energia alterna ligar/desligar, sem diálogos.
+  Temperatura, ventilação, automático, ventilar e oscilar ficam na tela principal.
+- A luz vermelha do topo acende durante o envio. Não há texto de “enviando”,
+  avisos técnicos, seletor de protocolo, importação, exportação ou edição de códigos.
+- Os ajustes são salvos automaticamente após o envio bem-sucedido.
+  O visor representa os ajustes pedidos pelo controle; IR não lê o estado do ar.
+- Os 13 botões originais estão presentes. Botões sem código integrado ficam
+  discretamente desabilitados e não simulam uma transmissão.
 
-## Instalar
+Sem conta, internet, anúncios ou rastreamento. Os códigos vêm no APK. Perfis
+importados em versões antigas são ignorados; só os arquivos do repositório
+configuram os sinais.
 
-1. Baixe o APK em **Releases** ou o artefato `hent-ir-remote-debug-apk` de uma
-   execução bem-sucedida em **Actions → Build**.
-2. Instale em Android 6 ou superior com emissor IR compatível com a API do
-   Android, como um Redmi Note 13 Pro compatível. A presença do emissor é
-   verificada no app. Emuladores não comprovam funcionamento do infravermelho.
-3. Selecione o idioma pelo sistema ou em **Idioma / Language** no app.
-   O mesmo APK contém português e inglês.
-4. Importe os sinais originais, se disponíveis. O candidato Transcold
-   já vem ativado para teste. Não é necessário importar um perfil para testar
-   esses códigos. Leia o aviso de compatibilidade.
-5. Aponte o topo do celular para o receptor e envie um comando por vez.
-   “Enviado” significa que o Android aceitou o envio, sem confirmar recepção.
-6. Salve os ajustes, registre o resultado e, se desejar, exporte o relatório.
-   Nada é enviado automaticamente.
+## Alteração dos códigos pelo mantenedor
 
-A temperatura e ventilação mostradas são ajustes **locais do candidato**.
-Não há leitura do estado do ar. Ligar/desligar oferece duas escolhas explícitas.
-Temperatura +/− seleciona resfriamento; Fresh air seleciona ventilação.
-Botões brutos importados não atualizam os ajustes locais, pois o app não conhece
-seu significado. Não há busca automática disparando centenas de códigos.
+- `app/src/main/assets/ir/transcold-candidate.json`: frequência, pulsos,
+  desligar, oscilação e tabela de temperatura/ventilação/modo.
+- `app/src/main/assets/ir/original-overrides.json`: sinais brutos para qualquer
+  um dos 13 botões originais, com prioridade sobre o codificador da tabela.
 
-## Completar os 13 códigos originais
+Veja [como editar](docs/EDITING_CODES.md) e o [formato dos sinais](docs/PROFILES.md).
+Altere o JSON, incremente `versionCode` e `versionName` e gere outro APK.
+O usuário final apenas instala a atualização, sem editar arquivos ou escolher
+um protocolo.
 
-Consulte o [formato dos perfis](docs/PROFILES.md) e o
-[modelo vazio](profiles/hent-original-template.json).
-Um perfil JSON pode preencher todos os botões assim que os sinais forem obtidos.
-A API infravermelha padrão do celular só transmite. Para capturar o controle
-original, é necessário receptor externo ou uma captura confiável já publicada.
-Filmar o LED piscando não fornece os códigos completos.
+## Pesquisa de compatibilidade
 
-## Build, pipeline e releases
+A tabela atual usa o protocolo documentado para **Transcold M1-F-NO-6**.
+Ainda não houve validação com o Hent 12V/24V de teto com dois ventiladores.
+A semelhança do nome do fornecedor ou da carcaça não comprova compatibilidade.
+Há sinais candidatos para oito funções. Luz, Strong, Eco, Sleep e Display
+continuam sem códigos originais e ficam desabilitados até serem preenchidos
+no repositório. A mudança visual não confirma funcionamento no aparelho.
 
-Requisitos: JDK 17, Android SDK 35 e build-tools 35.0.0.
+O celular só transmite IR. Capturar outro controle exige receptor externo ou
+uma captura confiável já publicada.
+
+## Build e publicação
+
+JDK 17, Android SDK 35, build-tools 35.0.0, Gradle 8.9 e AGP 8.7.3.
+Configure `ANDROID_HOME` ou `sdk.dir` em `local.properties`, ignorado pelo git.
 
 ```sh
 python3 tools/check_resources.py
 ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
 
-Configure `ANDROID_HOME` ou `sdk.dir` em `local.properties`, que não vai para o git.
-O APK instalável de teste fica em `app/build/outputs/apk/debug/app-debug.apk`.
-A compilação release local é **não assinada** sem configurar a assinatura.
+O APK de teste fica em `app/build/outputs/apk/debug/app-debug.apk`.
+O build release local é não assinado sem configurar a assinatura.
 
-A pipeline roda nos pushes para `main`, pull requests e manualmente, executando
-testes, lint, verificação de traduções e builds. Ela disponibiliza o APK de
-teste e os relatórios em Actions.
+O workflow Build verifica traduções, testes, lint e builds. Um push aprovado
+em `main` publica a versão atual como pré-lançamento com APK instalável de teste
+e SHA-256, caso a versão ainda não exista. Versões publicadas são preservadas.
 
-Um build bem-sucedido de um push para `main` publica automaticamente a versão
-experimental atual, com APK assinado para depuração, se ela ainda não existir.
+O workflow Release também aceita tags/manual e assinatura própria com os
+secrets `RELEASE_KEYSTORE_BASE64`, `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS`
+e `RELEASE_KEY_PASSWORD`. Sem eles, publica APK assinado para depuração, com
+nome explícito. Runners diferentes podem gerar chaves diferentes; pode ser
+necessário desinstalar o APK anterior, apagando os ajustes. Não coloque chaves
+privadas no repositório. A tag deve corresponder a `versionName`; incremente
+`versionCode` nas atualizações.
 
-Para uma publicação manual, envie uma tag igual ao `versionName` (ex.: `v0.1.1`) ou execute
-manualmente **Release** com essa tag. O workflow repete as verificações e cria
-um **pré-lançamento** com notas nos dois idiomas e checksums SHA-256.
+## Licença
 
-Para assinatura própria, configure os secrets `RELEASE_KEYSTORE_BASE64`,
-`RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS` e `RELEASE_KEY_PASSWORD`.
-Sem eles, a release publica um APK experimental **assinado para depuração**,
-com nome explícito. Builds diferentes podem usar chaves de depuração diferentes;
-pode ser necessário desinstalar o APK anterior, apagando dados locais. Exporte
-seu perfil antes. Não coloque chaves privadas no repositório.
-Incremente `versionCode` para novas atualizações. Releases existentes não são sobrescritas.
-
-## Código aberto e privacidade
-
-Licença **GPL-3.0-ou-posterior**. Qualquer pessoa pode usar, estudar, modificar
-e distribuir respeitando a licença. [Créditos de terceiros](THIRD_PARTY_NOTICES.md).
-Sem internet, contas, anúncios ou rastreamento no aplicativo. Dados permanecem
-no celular até você exportar e compartilhar por conta própria.
+**GPL-3.0-ou-posterior.** [Créditos de terceiros](THIRD_PARTY_NOTICES.md).
 Sem vínculo oficial com Hent, Xiaomi ou Transcold.
-
-Veja [as fontes da pesquisa](README.md#research-references) e
-[como contribuir](CONTRIBUTING.md). A referência visual é a foto oficial Hent;
-a carcaça semelhante do Alibaba não confirma a placa nem o protocolo interno.
-
-## Alterar os códigos integrados
-
-Na v0.1.1, os candidatos já vêm ativados. A tabela de estados, frequência e
-pulsos fica em `app/src/main/assets/ir/transcold-candidate.json`.
-Correções brutas por botão ficam em `app/src/main/assets/ir/original-overrides.json`.
-O usuário não precisa importar nada. Veja [como editar](docs/EDITING_CODES.md).
+[Fontes da pesquisa](README.md#license-and-research-sources).

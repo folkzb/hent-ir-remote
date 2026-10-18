@@ -48,28 +48,25 @@ Exact supported keys / Identificadores dos 13 botões:
 | `fresh_air` | Fresh air | Ventilar sem resfriar |
 | `display` | Display | Ligar/desligar visor |
 
-Validation: UTF-8 JSON, maximum 1 MiB, schema version 1, nonempty name up to
-100 characters, optional source up to 1000 characters, known button keys,
-carrier 10000–100000 Hz and 2–4096 positive integer pulse durations per command.
-Each complete signal must be shorter than 2 seconds (Android API limit).
-Unknown buttons, fractional values, zero/negative pulses and excessively long
-patterns are rejected before replacing the current profile. Import asks before
-replacement and does not transmit anything. The phone checks its own supported
-carrier range before transmission.
+## Repository-only configuration / Configuração apenas pelo repositório
 
-Validação: JSON UTF-8 até 1 MiB, versão 1, nome não vazio até 100 caracteres,
-fonte opcional até 1000 caracteres, identificadores conhecidos, portadora entre
-10000–100000 Hz e 2–4096 durações inteiras positivas por comando. Cada sinal
-completo deve durar menos de 2 segundos. Valores fracionários e inválidos são
-recusados antes de substituir o perfil. A importação pede confirmação e não
-envia sinais. A frequência também é conferida no hardware do celular.
+Edit `app/src/main/assets/ir/original-overrides.json` and rebuild the APK.
+There is no file picker, import/export or editing interface in the app.
+Edite `app/src/main/assets/ir/original-overrides.json` e recompile o APK.
+O aplicativo não oferece seletor de arquivos, importação/exportação ou edição.
 
-Missing keys are allowed. A complete mapping includes all 13 keys; the app
-reports mapping count, not verified compatibility. A recorded test result is
-user feedback, not proof that every button works. Exporting a report includes
-the profile and last send/error details; it never uploads the file.
+Validation: schema version 1, nonempty name up to 100 characters, source up to
+1000 characters, known button keys, carrier 10000–100000 Hz and 2–4096 positive
+integer pulse durations per command. Each signal must last less than 2 seconds.
+The phone checks its supported carrier range before transmission.
+Validação: versão 1, nome não vazio até 100 caracteres, fonte até 1000 caracteres,
+identificadores conhecidos, portadora 10000–100000 Hz e 2–4096 durações inteiras
+positivas por comando. Cada sinal deve durar menos de 2 segundos.
+O celular confere a portadora antes de enviar.
 
-Um perfil pode conter apenas alguns botões. A contagem de 13 mapeados não
-significa 13 validados. O resultado registrado pelo usuário não comprova todos
-os botões. O relatório exportado contém perfil e detalhes do último envio/erro;
-o app nunca faz upload desse arquivo.
+Missing keys are allowed. A complete mapping has all 13 keys, but mapping count
+does not prove hardware compatibility. Overrides take priority over the bundled
+state-table generator. User-imported data from older releases is ignored.
+É permitido preencher apenas alguns botões. Ter 13 códigos mapeados não comprova
+compatibilidade física. As substituições têm prioridade sobre o gerador da
+tabela integrada. Dados importados pelo usuário em versões antigas são ignorados.
