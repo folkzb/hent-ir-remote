@@ -1,0 +1,72 @@
+name: Build · Compilar
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android SDK · Instalar SDK Android
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Check translations · Verificar traduções
+        run: python3 tools/check_resources.py
+      - name: Test, lint and build · Testar, verificar e compilar
+        run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease --no-daemon
+      - name: Upload APK · Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: hent-ir-remote-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Reports · Relatórios
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-and-lint-reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+  publish-experimental:
+    name: Publish tested APK · Publicar APK testado
+    needs: android
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: hent-ir-remote-debug-apk
+          path: dist
+      - name: Publish experimental release · Publicar versão experimental
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n "s/.*versionName '\([^']*\)'.*/\1/p" app/build.gradle)
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo 'Release already exists; keeping published files / A versão já existe; arquivos preservados'
+            exit 0
+          fi
+          mv dist/app-debug.apk "dist/hent-ir-remote-${tag}-debug-signed.apk"
+          (cd dist && sha256sum *.apk > SHA256SUMS.txt)
+          cp docs/RELEASE_NOTES.md "$RUNNER_TEMP/release-notes.md"
+          printf '\n\n**Experimental debug-signed APK.** Future builds may require uninstalling the previous version.\n**APK experimental assinado para depuração.** Builds futuros podem exigir desinstalar a versão anterior.\n' >> "$RUNNER_TEMP/release-notes.md"
+          gh release create "$tag" dist/*.apk dist/SHA256SUMS.txt --target "$GITHUB_SHA" \
+            --prerelease --title "Hent IR Remote $tag · Experimental" --notes-file "$RUNNER_TEMP/release-notes.md"

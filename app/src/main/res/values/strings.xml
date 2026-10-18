@@ -1,0 +1,69 @@
+<resources>
+<string name="app_name">Hent IR Remote</string>
+<string name="subtitle">A remote for your parked adventures.</string>
+<string name="ir_available">Infrared transmitter detected</string>
+<string name="no_ir">No infrared transmitter detected on this device.</string>
+<string name="experimental_warning">Experimental • Hent compatibility has not been verified. All 13 original buttons are shown; buttons without codes do not transmit.</string>
+<string name="experimental_profile">Test Transcold candidate (unverified)</string>
+<string name="candidate_explanation">These codes were documented for a different model: Transcold M1-F-NO-6. A similar supplier name does not prove compatibility. Test one command at a time. No signal is sent by enabling this option. Lamp, Strong, Eco, Sleep and Display still need original codes.</string>
+<string name="enable">Enable testing</string>
+<string name="mapping_count">%1$s • Ready to test: %2$d / %3$d • Imported: %4$d</string>
+<string name="state">%1$d °C  ·  %2$s</string>
+<string name="local_state">Local Transcold settings only. The phone cannot read the actual AC state. Imported raw commands do not update these settings.</string>
+<string name="light">Lamp / LED</string>
+<string name="power">Power</string>
+<string name="temp_up">Temperature +</string>
+<string name="temp_down">Temperature −</string>
+<string name="fan_up">Fan +</string>
+<string name="fan_down">Fan −</string>
+<string name="auto">Automatic</string>
+<string name="strong">Strong / Turbo</string>
+<string name="eco">Eco / Standard</string>
+<string name="sleep">Sleep</string>
+<string name="swing">Swing flap</string>
+<string name="fresh_air">Fresh air / Fan only</string>
+<string name="display">Display</string>
+<string name="ready">Point the top of the phone at the AC receiver.</string>
+<string name="settings">Your remote</string>
+<string name="save_settings">Save local settings</string>
+<string name="saved">Saved on this phone.</string>
+<string name="import_profile">Import button codes (JSON)</string>
+<string name="export_profile">Export button codes (JSON)</string>
+<string name="imported">Imported code</string>
+<string name="candidate">Unverified candidate</string>
+<string name="unmapped">Code needed</string>
+<string name="no_code">No code is available for this button. Nothing was sent. Import a JSON profile containing its original raw infrared signal. The phone cannot learn codes by receiving infrared.</string>
+<string name="power_choice">Send power command</string>
+<string name="on">Turn on</string>
+<string name="off">Turn off</string>
+<string name="unsupported_frequency">This carrier frequency is not supported by the phone.</string>
+<string name="sending">Sending…</string>
+<string name="sent">Sent: %1$s. Check the AC response.</string>
+<string name="send_error">Unable to send (%1$s).</string>
+<string name="confirm_import">Replace the current profile with “%1$s” (mapped: %2$d)? This does not transmit any commands.</string>
+<string name="replace">Replace profile</string>
+<string name="imported_ok">Profile imported.</string>
+<string name="exported">File exported.</string>
+<string name="file_error">Unable to read or write this file</string>
+<string name="profile_format_help">Use a UTF-8 JSON profile with schemaVersion 1, name and commands. Each command needs frequencyHz and patternUs (positive integer microseconds, shorter than 2 seconds). Maximum file size: 1 MiB. See the repository documentation.</string>
+<string name="export_report">Export compatibility report</string>
+<string name="language">Language / Idioma</string>
+<string name="system_language">Follow device language</string>
+<string name="help">Help and open-source license</string>
+<string name="help_text">This app sends infrared using Android ConsumerIrManager. It does not receive or copy IR.\n\nAll 13 buttons follow the Hent product photo. Hent rooftop compatibility is unverified. Transcold is an enabled-by-default candidate for a different AC model, not an identified match. Missing codes are never guessed.\n\nImport raw codes for any button. No internet, account, ads or analytics. Profiles and test results stay on this phone unless you export and share them yourself.\n\nGPL-3.0-or-later. Transcold encoder adapted from IRremoteESP8266 (Chandrashekar Shetty, crankyoldgit, siriuslzx); see source notices. No affiliation with Hent, Xiaomi or Transcold.</string>
+<string name="test_result">Record test result</string>
+<string-array name="fans">
+<item>Auto fan</item>
+<item>Low fan</item>
+<item>Medium fan</item>
+<item>High fan</item>
+</string-array>
+<string-array name="results">
+<item>Working</item>
+<item>Partially working</item>
+<item>Not working</item>
+<item>Not tested</item>
+</string-array>
+<string name="button_status">%1$s\n%2$s</string>
+<string name="eyebrow">HENT / OPEN SOURCE</string>
+</resources>

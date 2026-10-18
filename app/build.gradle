@@ -1,0 +1,34 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'io.github.folkzb.hentremote'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'io.github.folkzb.hentremote'
+        minSdk 23
+        targetSdk 35
+        versionCode 2
+        versionName '0.1.1'
+        resourceConfigurations += ['en', 'pt-rBR']
+    }
+    signingConfigs {
+        release {
+            if (System.getenv('RELEASE_KEYSTORE_PATH')) {
+                storeFile file(System.getenv('RELEASE_KEYSTORE_PATH'))
+                storePassword System.getenv('RELEASE_STORE_PASSWORD')
+                keyAlias System.getenv('RELEASE_KEY_ALIAS')
+                keyPassword System.getenv('RELEASE_KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (System.getenv('RELEASE_KEYSTORE_PATH')) signingConfig signingConfigs.release
+        }
+    }
+    bundle { language { enableSplit = false } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    lint { abortOnError true; checkReleaseBuilds true }
+}
+dependencies { testImplementation 'junit:junit:4.13.2' }
+dependencies { testImplementation 'org.json:json:20240303' }
