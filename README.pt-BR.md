@@ -1,5 +1,7 @@
 # Hent Controle IR
 
+[Baixar APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.1.1/hent-ir-remote-v0.1.1-debug-signed.apk) · [Notas da versão](https://github.com/folkzb/hent-ir-remote/releases/tag/v0.1.1) · [Build aprovado](https://github.com/folkzb/hent-ir-remote/actions/runs/39133667447)
+
 Português (Brasil) · [English](README.md)
 
 Controle infravermelho Android de código aberto para investigar o ar de teto

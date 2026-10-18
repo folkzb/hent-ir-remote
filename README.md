@@ -1,5 +1,7 @@
 # Hent IR Remote / Hent Controle IR
 
+[Download APK](https://github.com/folkzb/hent-ir-remote/releases/download/v0.1.1/hent-ir-remote-v0.1.1-debug-signed.apk) · [Release notes](https://github.com/folkzb/hent-ir-remote/releases/tag/v0.1.1) · [Passing build](https://github.com/folkzb/hent-ir-remote/actions/runs/39133667447)
+
 [Português (Brasil)](README.pt-BR.md) · English
 
 Open-source Android infrared remote for investigating Hent 12V/24V dual-fan
