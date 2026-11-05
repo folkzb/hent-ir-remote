@@ -24,7 +24,6 @@ android {
         lab {
             initWith debug
             applicationIdSuffix '.lab'
-            versionCode 6
             versionNameSuffix '-lab.2'
         }
         release {
@@ -40,6 +39,11 @@ android {
         unitTests.all {
             systemProperty 'robolectric.dependency.repo.url', 'https://repo.maven.apache.org/maven2'
         }
+    }
+}
+androidComponents {
+    onVariants(selector().withBuildType('lab')) { variant ->
+        variant.outputs.each { it.versionCode.set(6) }
     }
 }
 dependencies { testImplementation 'junit:junit:4.13.2' }
