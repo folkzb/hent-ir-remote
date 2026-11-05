@@ -1,0 +1,23 @@
+<resources>
+  <string name="lab_name">Hent IR Lab</string>
+  <string name="lab_hint">Aponte o celular para o ar. Envie um sinal, espere e registre a reação. Teste Ligar com o ar desligado e Desligar se ele ligar. Pule Desligar se Ligar não fizer nada.</string>
+  <string name="lab_send">Enviar este sinal</string>
+  <string name="lab_none">Sem reação</string>
+  <string name="lab_beep">Só apitou ou piscou</string>
+  <string name="lab_changed">Ligou, desligou ou mudou ajuste</string>
+  <string name="lab_prev">Anterior</string>
+  <string name="lab_next">Próximo</string>
+  <string name="lab_copy">Copiar resultados</string>
+  <string name="lab_copied">Resultados copiados</string>
+  <string name="lab_empty">Registre um resultado primeiro</string>
+  <string name="lab_position">Lote A · %1$d de %2$d</string>
+  <string name="lab_details">%1$s · %2$d Hz</string>
+  <string name="lab_on">Ligar · frio 24 °C</string>
+  <string name="lab_off">Desligar</string>
+  <string name="lab_toggle">Alternar liga/desliga</string>
+  <string name="lab_sending">IR: enviando…</string>
+  <string name="lab_sent">Sinal enviado. O que o ar fez?</string>
+  <string name="lab_frequency">Frequência fora da faixa suportada pelo celular</string>
+  <string name="lab_error">O celular não conseguiu enviar o sinal</string>
+  <string name="lab_bad_batch">Não foi possível carregar o lote A</string>
+</resources>

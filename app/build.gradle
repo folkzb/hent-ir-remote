@@ -21,6 +21,11 @@ android {
         }
     }
     buildTypes {
+        lab {
+            initWith debug
+            applicationIdSuffix '.lab'
+            versionNameSuffix '-lab.1'
+        }
         release {
             minifyEnabled false
             if (System.getenv('RELEASE_KEYSTORE_PATH')) signingConfig signingConfigs.release

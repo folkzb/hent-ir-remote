@@ -1,0 +1,23 @@
+<resources>
+  <string name="lab_name">Hent IR Lab</string>
+  <string name="lab_hint">Aim the phone at the AC. Send one signal, wait for a response, then record it. Test ON with the unit off and OFF if it turns on. Skip the OFF signal if ON did nothing.</string>
+  <string name="lab_send">Send this signal</string>
+  <string name="lab_none">No reaction</string>
+  <string name="lab_beep">Beep or light only</string>
+  <string name="lab_changed">Turned on, off or changed setting</string>
+  <string name="lab_prev">Previous</string>
+  <string name="lab_next">Next</string>
+  <string name="lab_copy">Copy results</string>
+  <string name="lab_copied">Results copied</string>
+  <string name="lab_empty">Record a result first</string>
+  <string name="lab_position">Batch A · %1$d of %2$d</string>
+  <string name="lab_details">%1$s · %2$d Hz</string>
+  <string name="lab_on">Turn on · cool 24 °C</string>
+  <string name="lab_off">Turn off</string>
+  <string name="lab_toggle">Toggle power</string>
+  <string name="lab_sending">IR: sending…</string>
+  <string name="lab_sent">Signal sent. What did the AC do?</string>
+  <string name="lab_frequency">This frequency is outside the supported range</string>
+  <string name="lab_error">The phone could not send the signal</string>
+  <string name="lab_bad_batch">Could not load batch A</string>
+</resources>

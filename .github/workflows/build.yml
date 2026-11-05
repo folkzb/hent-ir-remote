@@ -28,12 +28,18 @@ jobs:
       - name: Check translations · Verificar traduções
         run: python3 tools/check_resources.py
       - name: Test, lint and build · Testar, verificar e compilar
-        run: ./gradlew testDebugUnitTest lintDebug assembleDebug assembleRelease --no-daemon
+        run: ./gradlew testDebugUnitTest testLabUnitTest lintDebug lintLab assembleDebug assembleRelease assembleLab --no-daemon
       - name: Upload APK · Disponibilizar APK
         uses: actions/upload-artifact@v7.0.2
         with:
           name: hent-ir-remote-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Upload IR Lab APK
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: hent-ir-lab-apk
+          path: app/build/outputs/apk/lab/app-lab.apk
           if-no-files-found: error
       - name: Reports · Relatórios
         if: always()
@@ -73,3 +79,29 @@ jobs:
           printf '\n\n**Experimental debug-signed APK.** Future builds may require uninstalling the previous version.\n**APK experimental assinado para depuração.** Builds futuros podem exigir desinstalar a versão anterior.\n' >> "$RUNNER_TEMP/release-notes.md"
           gh release create "$tag" dist/*.apk dist/SHA256SUMS.txt --target "$GITHUB_SHA" \
             --prerelease --title "Hent IR Remote $tag · Experimental" --notes-file "$RUNNER_TEMP/release-notes.md"
+  publish-lab:
+    name: Publish IR Lab APK
+    needs: android
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: hent-ir-lab-apk
+          path: dist
+      - name: Publish standalone lab prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(cat docs/IR_LAB_VERSION)
+          if gh release view "$tag" >/dev/null 2>&1; then
+            exit 0
+          fi
+          mv dist/app-lab.apk "dist/hent-ir-${tag}.apk"
+          (cd dist && sha256sum *.apk > SHA256SUMS.txt)
+          gh release create "$tag" dist/*.apk dist/SHA256SUMS.txt --target "$GITHUB_SHA" \
+            --prerelease --title "Hent IR Lab ${tag#lab-v}" --notes-file docs/IR_LAB.md
