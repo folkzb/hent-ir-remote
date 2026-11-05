@@ -24,7 +24,8 @@ android {
         lab {
             initWith debug
             applicationIdSuffix '.lab'
-            versionNameSuffix '-lab.1'
+            versionCode 6
+            versionNameSuffix '-lab.2'
         }
         release {
             minifyEnabled false

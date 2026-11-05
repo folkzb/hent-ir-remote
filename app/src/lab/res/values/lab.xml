@@ -10,7 +10,7 @@
   <string name="lab_copy">Copy results</string>
   <string name="lab_copied">Results copied</string>
   <string name="lab_empty">Record a result first</string>
-  <string name="lab_position">Batch A · %1$d of %2$d</string>
+  <string name="lab_position">Batch %1$s · %2$d of %3$d</string>
   <string name="lab_details">%1$s · %2$d Hz</string>
   <string name="lab_on">Turn on · cool 24 °C</string>
   <string name="lab_off">Turn off</string>
@@ -19,5 +19,8 @@
   <string name="lab_sent">Signal sent. What did the AC do?</string>
   <string name="lab_frequency">This frequency is outside the supported range</string>
   <string name="lab_error">The phone could not send the signal</string>
-  <string name="lab_bad_batch">Could not load batch A</string>
+  <string name="lab_bad_batch">Could not load this batch</string>
+  <string name="lab_batch">Batch %1$s</string>
+  <string name="lab_choose_batch">Choose batch</string>
+  <string name="lab_next_power">Skip to next ON or toggle</string>
 </resources>

@@ -1,7 +1,21 @@
 ## Português (Brasil)
 
 O **Hent IR Lab** é um APK separado para identificar o protocolo do ar Hent
-12 V. Instala ao lado do controle normal. O lote A traz 25 sinais candidatos
+12 V. Instala ao lado do controle normal. A versão 0.2.0 reúne 150 testes.
+Os lotes **B–D** adicionam 125 sinais (67 testes iniciais de ligar/alternar
+e 58 de desligar):
+
+| Lote | Testes | Famílias em destaque |
+| --- | ---: | --- |
+| B | 47 | Carrier, Haier, Kelvinator, Whirlpool, Bosch e portáteis |
+| C | 38 | LG, Samsung, Daikin, Toshiba e Panasonic |
+| D | 40 | Fujitsu, Mitsubishi, Hitachi, Sharp, Sanyo e Corona |
+
+Comece pelo lote B. Use **Pular para próximo Ligar ou Alternar** se não
+houver reação. O aplicativo salva a posição e os resultados de cada lote.
+**Copiar resultados** copia o lote selecionado.
+
+O lote A traz 25 sinais candidatos
 de 13 variantes: Coolix, Midea, Gree YAW1F e YBOFB, TCL112, Goodweather,
 Kelon, Kelon168, Haier YRW02, Neoclima, Mirage, Trotec e Airton.
 
@@ -19,7 +33,9 @@ são de protocolos conhecidos, sem confirmação de compatibilidade com o Hent.
 ## English
 
 **Hent IR Lab** is a standalone APK that installs beside the regular remote.
-Batch A contains 25 candidate signals across 13 protocol/model variants.
+Batches A–D contain 150 trials. B–D add 125 signals, including 67 initial
+ON/toggle tests. Use the batch selector and skip button; copied results cover
+the selected batch.
 Start with the AC off and send one ON signal at a time. If it turns on,
 try the matching OFF signal; otherwise skip to the next ON. Kelon has a
 single toggle signal. Record the observed reaction and copy the results.
@@ -38,5 +54,6 @@ g++ -std=gnu++11 -DUNIT_TEST -I"$IR_SRC/src" -I"$IR_SRC/test" \
     tools/generate_lab.cpp "$IR_SRC"/src/*.cpp -o /tmp/hent-generate-lab
 /tmp/hent-generate-lab > /tmp/hent-batch-a.json &&
     cp /tmp/hent-batch-a.json app/src/lab/assets/ir/batch-a.json
+python3 tools/generate_lab_extended.py "$IR_SRC"
 ./gradlew testLabUnitTest lintLab assembleLab
 ```

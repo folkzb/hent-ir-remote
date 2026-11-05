@@ -10,7 +10,7 @@
   <string name="lab_copy">Copiar resultados</string>
   <string name="lab_copied">Resultados copiados</string>
   <string name="lab_empty">Registre um resultado primeiro</string>
-  <string name="lab_position">Lote A · %1$d de %2$d</string>
+  <string name="lab_position">Lote %1$s · %2$d de %3$d</string>
   <string name="lab_details">%1$s · %2$d Hz</string>
   <string name="lab_on">Ligar · frio 24 °C</string>
   <string name="lab_off">Desligar</string>
@@ -19,5 +19,8 @@
   <string name="lab_sent">Sinal enviado. O que o ar fez?</string>
   <string name="lab_frequency">Frequência fora da faixa suportada pelo celular</string>
   <string name="lab_error">O celular não conseguiu enviar o sinal</string>
-  <string name="lab_bad_batch">Não foi possível carregar o lote A</string>
+  <string name="lab_bad_batch">Não foi possível carregar este lote</string>
+  <string name="lab_batch">Lote %1$s</string>
+  <string name="lab_choose_batch">Escolher lote</string>
+  <string name="lab_next_power">Pular para próximo Ligar ou Alternar</string>
 </resources>
